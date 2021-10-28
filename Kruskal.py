@@ -1,20 +1,29 @@
 class Graph:
+    
     def __init__(self, vertex):
         self.V = vertex
         self.graph = []
- 
+        
+
+    #функция добавления рёбер
     def add_edge(self, u, v, w):
         self.graph.append([u, v, w])
  
- 
-    def search(self, parent, i):
+
+    #функция построения деревьев для каждой вершины, создание
+    #множества подграфов
+    def find_set(self, parent, i):
         if parent[i] == i:
             return i
-        return self.search(parent, parent[i])
- 
-    def apply_union(self, parent, rank, x, y):
-        xr = self.search(parent, x)
-        yr = self.search(parent, y)
+        return self.find_set(parent, parent[i])
+
+
+    #функция объединения двух подграфов
+    #(анализ инцидентности вершин текущего ребра разных подграфов.
+    #если подграфы лежат в разных компонентах - объединяем в один)
+    def union_sets(self, parent, rank, x, y):
+        xr = self.find_set(parent, x)
+        yr = self.find_set(parent, y)
         if rank[xr] < rank[yr]:
             parent[xr] = yr
         elif rank[xr] > rank[yr]:
@@ -27,8 +36,6 @@ class Graph:
         pass
   
     def kruskal(self, vertex, matrix):
-        
-        
         result = []
         i, e = 0, 0
         
@@ -46,12 +53,12 @@ class Graph:
         while e < self.V - 1:
             u, v, w = self.graph[i]
             i = i + 1
-            x = self.search(parent, u)
-            y = self.search(parent, v)
+            x = self.find_set(parent, u)
+            y = self.find_set(parent, v)
             if x != y:
                 e = e + 1
                 result.append([u, v, w])
-                self.apply_union(parent, rank, x, y)
+                self.union_sets(parent, rank, x, y)
                 
         #переворачиваю результат, чтобы забить его в нижний треугольник матрицы
         for k in range(len(result)):
